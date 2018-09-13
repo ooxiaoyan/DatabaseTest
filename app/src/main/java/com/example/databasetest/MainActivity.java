@@ -1,15 +1,19 @@
 package com.example.databasetest;
 
 import android.content.ContentValues;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
 public class MainActivity extends AppCompatActivity {
 
     private MyDatabaseHelper dbHelper;
+    private static final String TAG = "MainActivity";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,6 +66,30 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 SQLiteDatabase db = dbHelper.getWritableDatabase();
                 db.delete("Book", "pages > ?", new String[]{"500"});
+            }
+        });
+
+        Button queryData = findViewById(R.id.query_data);
+        queryData.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                SQLiteDatabase db = dbHelper.getWritableDatabase();
+                //查询Book表中的所有数据
+                Cursor cursor = db.query("Book", null, null, null, null, null, null);
+                if (cursor.moveToFirst()) {
+                    do {
+                        //遍历Cursor对象，取出数据并打印
+                        String name = cursor.getString(cursor.getColumnIndex("name"));
+                        String author = cursor.getString(cursor.getColumnIndex("author"));
+                        int pages = cursor.getInt(cursor.getColumnIndex("pages"));
+                        double price = cursor.getDouble(cursor.getColumnIndex("price"));
+                        Log.d(TAG, "book name is " + name);
+                        Log.d(TAG, "book author is " + author);
+                        Log.d(TAG, "book pages is " + pages);
+                        Log.d(TAG, "book price is " + price);
+                    } while (cursor.moveToNext());
+                }
+                cursor.close();
             }
         });
     }
